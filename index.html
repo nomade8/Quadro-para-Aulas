@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Quadro para Escolas</title>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+    
+    html{
+      background-color: #d7d9d9;
+    }
+    #canvas {
+      width: 100%;
+      height: 80%;
+     
+
+    }
+
+    .botao-fechar {
+
+      position: absolute;
+      cursor: pointer;
+      width: 30px;
+      height: 20px;
+      font-size: 10px;
+      color: red;
+      background-color: #d7d9d9;
+      border: none;
+      left: -25px;
+
+
+    }
+
+    .foto {
+      
+      max-width: 600px;
+      max-height: 400px;
+      cursor: move;
+    }
+
+    video {
+      position: absolute;
+      visibility: hidden;
+      left: 40px;
+      top: 60px;
+    }
+
+    .objeto-texto {
+      position: absolute;
+      color: #150370;
+      cursor: move;
+      font-size: 50px;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+  </style>
+</head>
+
+<body>
+  <textarea id="texto"></textarea>
+  <input type="color" id="cor" name="cor">
+  <button onclick="criarTexto()" style="background-color: rgb(122, 250, 129)">Criar Texto</button>
+  <button onclick="abrirImagem()" style="background-color: rgb(52, 52, 246); color: white">abrir imagem</button>
+  <button onclick="fecharImagem()" style="background-color: rgb(54, 54, 252); color: white">fechar imagem</button>
+  <input type="file" id="video-upload" accept="video/*">
+  <button onclick="abrirVideo()">Abrir Vídeo</button>
+  <button onclick="fecharVideo()">Fechar Vídeo</button>
+  <video id="video-player" width="640" height="360" controls="controls"></video>
+  
+  
+
+  <div id="canvas">
+
+  </div>
+
+  <script>
+
+    var objetosTexto = [];
+    // array para guardar todos os objetos de texto criados
+    var objetoTextoSelecionado = null; // variável para guardar o objeto de texto que está sendo arrastado
+    var mouseX, mouseY; // variáveis para guardar a posição do mouse durante o arraste
+
+    function abrirImagem() {
+      var input = document.createElement('input');
+      input.type = 'file';
+
+      input.onchange = e => {
+        var file = e.target.files[0];
+        var reader = new FileReader();
+
+        reader.readAsDataURL(file);
+        reader.onload = readerEvent => {
+          var content = readerEvent.target.result;
+          var image = new Image();
+          image.src = content;
+          image.classList.add("foto");
+          document.getElementById("canvas").appendChild(image);
+          $('.foto').draggable(); // Torna o elemento ".foto" arrastável
+        }
+      }
+
+      input.click();
+    }
+
+    function fecharImagem() {
+      var imagem = document.querySelector('.foto');
+      if (imagem) {
+        imagem.remove();
+      }
+    }
+
+
+    function criarTexto() {
+      // Obtém o valor do textarea
+      var valorTexto = document.getElementById("texto").value;
+
+      // Cria um novo objeto de texto
+      var objetoTexto = document.createElement("div");
+      let cor = document.getElementById("cor").value;
+      objetoTexto.style.color = cor;
+      objetoTexto.innerHTML = valorTexto;
+      objetoTexto.classList.add("objeto-texto");
+      document.getElementById("texto").value = "";
+
+     
+      // Cria um botão para fechar o texto
+      var botaoFechar = document.createElement("button");
+      botaoFechar.innerHTML = "X";
+      botaoFechar.classList.add("botao-fechar");
+
+      // Cria uma div para conter o objeto de texto e o botão de fechar
+      var divObjetoTexto = document.createElement("div");
+      divObjetoTexto.appendChild(objetoTexto);
+      divObjetoTexto.appendChild(botaoFechar);
+
+      // Define a posição da div aleatoriamente
+      divObjetoTexto.style.left = Math.random() * 50 + "px";
+      divObjetoTexto.style.top = Math.random() * 50 + "px";
+
+      // Adiciona a div ao canvas e ao array de objetos
+      var canvas = document.getElementById("canvas");
+      canvas.appendChild(divObjetoTexto);
+      objetosTexto.push(divObjetoTexto);
+
+      // Adiciona um evento de clique ao botão para remover o objeto de texto
+      botaoFechar.addEventListener("click", function () {
+        canvas.removeChild(divObjetoTexto);
+        objetosTexto.splice(objetosTexto.indexOf(divObjetoTexto), 1);
+        if (objetoTextoSelecionado === divObjetoTexto) {
+          objetoTextoSelecionado = null;
+        }
+        
+
+
+
+
+
+
+      });
+      
+
+      // Torna o objeto de texto e o botão de fechar arrastáveis
+      $(divObjetoTexto).draggable();
+    }
+    var videoPlayer = document.getElementById('video-player');
+    // função para abrir vídeos
+function abrirVideo() {
+  var videoUpload = document.getElementById('video-upload');
+  videoPlayer.style.visibility = "visible";
+
+  if (!videoUpload.files || !videoUpload.files[0]) {
+    return;
+  }
+
+  var file = videoUpload.files[0];
+  var url = URL.createObjectURL(file);
+
+  videoPlayer.src = url;
+  videoPlayer.play();
+
+  $('#video-player').draggable();
+}
+
+function fecharVideo() {
+  videoPlayer.pause();
+  videoPlayer.src = '';
+  videoPlayer.style.visibility = "hidden";
+}
+
+  </script>
+</body>
+
+</html>
